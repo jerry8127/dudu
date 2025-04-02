@@ -1,0 +1,155 @@
+import tkinter as tk
+import random
+
+git config --global user.name "jerry8127"
+git config --global user.email "jerryrcgaming@gmail.com"
+
+echo "# dudu" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/jerry8127/dudu.git
+git push -u origin main
+
+
+# 히라가나 & 가타카나 데이터
+kana_dict = {
+    "히라가나": {
+        "あ": "아", "い": "이", "う": "우", "え": "에", "お": "오",
+        "か": "카", "き": "키", "く": "쿠", "け": "케", "こ": "코",
+        "さ": "사", "し": "시", "す": "스", "せ": "세", "そ": "소",
+        "た": "타", "ち": "치", "つ": "츠", "て": "테", "と": "토",
+        "な": "나", "に": "니", "ぬ": "누", "ね": "네", "の": "노",
+        "は": "하", "ひ": "히", "ふ": "후", "へ": "헤", "ほ": "호",
+        "ま": "마", "み": "미", "む": "무", "め": "메", "も": "모",
+        "や": "야", "ゆ": "유", "よ": "요",
+        "ら": "라", "り": "리", "る": "루", "れ": "레", "ろ": "로",
+        "わ": "와", "を": "오", "ん": ["응", "음"]
+    },
+    "가타카나": {
+        "ア": "아", "イ": "이", "ウ": "우", "エ": "에", "オ": "오",
+        "カ": "카", "キ": "키", "ク": "쿠", "ケ": "케", "コ": "코",
+        "サ": "사", "シ": "시", "ス": "스", "セ": "세", "ソ": "소",
+        "タ": "타", "チ": "치", "ツ": "츠", "テ": "테", "ト": "토",
+        "ナ": "나", "ニ": "니", "ヌ": "누", "ネ": "네", "ノ": "노",
+        "ハ": "하", "ヒ": "히", "フ": "후", "ヘ": "헤", "ホ": "호",
+        "マ": "마", "ミ": "미", "ム": "무", "メ": "메", "モ": "모",
+        "ヤ": "야", "ユ": "유", "ヨ": "요",
+        "ラ": "라", "リ": "리", "ル": "루", "レ": "레", "ロ": "로",
+        "ワ": "와", "ヲ": "오", "ン": ["응", "음"]
+    }
+}
+
+
+
+class KanaQuizApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("히라가나 & 가타카나 학습")
+        self.root.geometry("1200x800")  # 기본 크기를 크게 설정
+        self.root.configure(bg="#f0f0f0")
+
+        self.mode = None
+        self.kana_list = []
+        self.current_kana = None
+        self.correct_answers = []
+
+        self.create_main_menu()
+
+    def create_main_menu(self):
+        """ 히라가나/가타카나 선택 화면 """
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        self.top_frame = tk.Frame(self.root, bg="#f0f0f0")
+        self.top_frame.pack(pady=20)
+
+        self.hiragana_button = tk.Button(self.top_frame, text="히라가나", font=("맑은 고딕", 22),
+                                         bg="#4CAF50", fg="white", width=15, height=2,
+                                         command=lambda: self.start_quiz("히라가나"))
+        self.hiragana_button.pack(side=tk.LEFT, padx=30)
+
+        self.katakana_button = tk.Button(self.top_frame, text="가타카나", font=("맑은 고딕", 22),
+                                         bg="#2196F3", fg="white", width=15, height=2,
+                                         command=lambda: self.start_quiz("가타카나"))
+        self.katakana_button.pack(side=tk.LEFT, padx=30)
+
+        self.exit_button = tk.Button(self.root, text="종료", font=("맑은 고딕", 20),
+                                     bg="#F44336", fg="white", width=15, height=2,
+                                     command=self.root.destroy)  # ✅ 창이 완전히 닫히도록 수정
+        self.exit_button.pack(side=tk.BOTTOM, pady=40)
+
+    def start_quiz(self, mode):
+        """ 히라가나 / 가타카나 선택 후 학습 시작 """
+        self.mode = mode
+        self.kana_list = list(kana_dict[mode].items())
+
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        self.kana_label = tk.Label(self.root, text="", font=("Arial", 120, "bold"), fg="blue", bg="#f0f0f0")
+        self.kana_label.pack(pady=50)
+
+        self.entry = tk.Entry(self.root, font=("맑은 고딕", 28), justify="center", width=15, relief="solid", bd=3)
+        self.entry.pack(pady=20)
+        self.entry.bind("<Return>", self.check_answer)
+
+        self.result_label = tk.Label(self.root, text="", font=("맑은 고딕", 24, "bold"), bg="#f0f0f0")
+        self.result_label.pack(pady=30)
+
+        self.bottom_frame = tk.Frame(self.root, bg="#f0f0f0")
+        self.bottom_frame.pack(side=tk.BOTTOM, pady=40)
+
+        self.retry_button = tk.Button(self.bottom_frame, text="다시 학습", font=("맑은 고딕", 20),
+                                      bg="#FF9800", fg="white", width=15, height=2,
+                                      command=self.create_main_menu)
+        self.retry_button.pack(side=tk.LEFT, padx=30)
+
+        self.exit_button = tk.Button(self.bottom_frame, text="종료", font=("맑은 고딕", 20),
+                                     bg="#F44336", fg="white", width=15, height=2, command=self.root.destroy)
+        self.exit_button.pack(side=tk.LEFT, padx=30)
+
+        self.next_question()
+
+    def next_question(self, event=None):
+        """ 랜덤한 문제 출제 """
+        self.current_kana, self.correct_answers = random.choice(self.kana_list)
+        if isinstance(self.correct_answers, str):
+            self.correct_answers = [self.correct_answers]
+
+        self.kana_label.config(text=self.current_kana)
+        self.entry.delete(0, tk.END)
+        self.result_label.config(text="")
+        self.root.configure(bg="#f0f0f0")
+        self.entry.config(bg="white", fg="black")
+
+        self.root.unbind("<space>")
+        self.root.unbind("<Return>")
+
+    def check_answer(self, event=None):
+        """ 사용자의 입력을 검사하여 정답 여부 확인 """
+        user_input = self.entry.get().strip()
+
+        if not user_input:
+            self.result_label.config(text="⚠ 입력하세요!", fg="orange")
+            self.root.unbind("<space>")
+            return
+
+        if user_input in self.correct_answers:
+            self.result_label.config(text="✅ 정답! (엔터키를 눌러 다음 문제로)", fg="green")
+            self.root.configure(bg="#D4EDDA")
+            self.entry.config(bg="#D4EDDA", fg="black")
+            self.root.bind("<Return>", self.next_question)
+            self.root.unbind("<space>")
+        else:
+            self.result_label.config(text=f"❌ 오답! 정답: {', '.join(self.correct_answers)} (스페이스바를 눌러 넘어가기)", fg="red")
+            self.root.configure(bg="#F8D7DA")
+            self.entry.config(bg="#F8D7DA", fg="black")
+            self.root.bind("<space>", self.next_question)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = KanaQuizApp(root)
+    root.mainloop()
+
